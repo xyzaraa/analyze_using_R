@@ -1,0 +1,212 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+install.packages("tidyverse") #manipulate and visualization data
+install.packages("janitor") #cleaning data
+install.packages("skimr") #statistic
+install.packages("lubridate") #processing datetime
+install.packages("readxl") #read excel
+install.packages("treemapify") #treemap for visualization
+```
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(skimr)
+library(lubridate)
+library(readxl)
+library(treemapify)
+library(dplyr)
+```
+
+
+```{r}
+df <- read_excel("C:/Users/kiara/Docs/Kuliah/Experience/R-first_project/sample_-_superstore.xls")
+```
+```{r}
+head(df,5)
+```
+
+
+```{r}
+glimpse(df)
+```
+
+
+```{r}
+df <- clean_names(df)
+```
+
+
+```{r}
+colnames(df)
+```
+
+
+```{r}
+dim(df)
+```
+
+
+```{r}
+sum(is.na(df))
+```
+
+
+```{r}
+sum(duplicated(df))
+```
+
+
+```{r}
+sapply(df, class)
+```
+
+
+```{r}
+df <- within(df, rm(postal_code, state, row_id))
+```
+
+
+```{r}
+names(df)
+```
+
+
+```{r}
+summary(df)
+```
+
+
+```{r}
+print(paste("Category Value:", paste(unique(df$category), collapse = ", ")))
+print(paste("Subcategory Value:", paste(unique(df$sub_category), collapse=",")))
+print(paste("Country Value:", paste(unique(df$country), collapse = ", ")))
+print(paste("Region Value:", paste(unique(df$region), collapse = ", ")))
+```
+
+
+```{r}
+df %>% 
+  group_by(category) %>% 
+  summarise(total=n()) %>% 
+  arrange(desc(total))
+
+```
+
+
+```{r}
+df %>% 
+  group_by(sub_category) %>% 
+  summarise(total=n()) %>% 
+  arrange(desc(total))
+```
+
+
+```{r}
+ggplot(df, aes(x=sub_category, fill=category)) +
+geom_bar() + theme_classic() + coord_flip() + 
+labs(title = 'Count by Category and Sub Category', x="Sub Category", y ="Frequency") +
+theme(plot.title = element_text(size = 20, colour = "black", face="bold", hjust = 0.5))
+```
+
+
+```{r}
+df %>% 
+  group_by(sub_category) %>% 
+  summarise( total_sales = sum(sales),total_profit =sum(profit)) %>% 
+  pivot_longer(c("total_sales", "total_profit")) %>% 
+  ggplot(aes(x=sub_ategory, y = value, fill = name)) + 
+  geom_col(position = position_dodge()) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(legend.title = element_blank()) +
+  scale_y_continuous(labels = scales::comma)+
+  labs(title = "Total Profit and Sales by Sub Category") +
+  theme(plot.title = element_text(size=20, face="bold", hjust = 0.5))
+
+```
+
+
+
+```{r}
+df_long <- df %>%
+    pivot_longer(cols = c(sales, profit), names_to = "metric", values_to = "value") %>%
+    mutate(region = factor(region, levels = unique(region)))
+
+ggplot(df_long, aes(x = region, y = value, fill = metric)) +
+  geom_bar(stat = 'identity', position = position_dodge(), width = 0.8) +
+  coord_polar(theta = "x") +
+  theme_minimal() + 
+  theme(
+    axis.text.x = element_text(size = 12, face = 'bold', color = 'black'),
+    axis.text.y = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(size = 16, face = 'bold', color = 'black')
+  ) +
+  scale_fill_manual(values = c("#69b3a2", "#404080")) +
+  labs(title = "Circular Barplot: Sales and Profit by Region")
+```
+
+
+```{r}
+df %>% 
+  group_by(product_name) %>% 
+  summarize(count_of_products=n()) %>% 
+  arrange(desc(count_of_products)) %>% 
+  slice_head(n=10) %>% 
+  ggplot(superstore, 
+         mapping = aes(x= product_name,
+                       y= count_of_products))+
+   geom_segment(aes(x = reorder(product_name, count_of_products), xend = product_name,
+                   y = 0, yend = count_of_products), size =1,)+
+  geom_point(size=10, color= "steelblue",
+             shape = 20, stroke = 2) + coord_flip() + theme_bw() +
+  labs(title = "Distribution of Top 10 Product",
+       x = NULL) +
+  theme(plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
+  geom_text(aes(label= count_of_products), 
+            color="black", size=4, vjust=0.5, fontface='bold')
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
